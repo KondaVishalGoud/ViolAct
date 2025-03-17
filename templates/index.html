@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Violence Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .hero-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1200px;
+        }
+        
+        .feature-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -35px auto 20px;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+        }
+        
+        .stats-item {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .stats-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tech-section {
+            background: linear-gradient(135deg, #f7f9fc 0%, #e6edf5 100%);
+        }
+        
+        .tech-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+        
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .footer-gradient {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+        }
+        
+        /* Animation classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-in.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Staggered animation delays */
+        .delay-100 { transition-delay: 0.1s; }
+        .delay-200 { transition-delay: 0.2s; }
+        .delay-300 { transition-delay: 0.3s; }
+        .delay-400 { transition-delay: 0.4s; }
+        .delay-500 { transition-delay: 0.5s; }
+        
+        /* Floating animation */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Pulse animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Navbar transition */
+        .navbar {
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #6366F1;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4F46E5;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navbar -->
+    <nav id="navbar" class="navbar fixed w-full z-50 py-4 px-6 transition-all duration-300">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-white text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold text-white">VioDetect</span>
+            </a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#features" class="text-white hover:text-indigo-200 transition-colors">Features</a>
+                <a href="#how-it-works" class="text-white hover:text-indigo-200 transition-colors">How It Works</a>
+                <a href="#technology" class="text-white hover:text-indigo-200 transition-colors">Technology</a>
+                <a href="#about" class="text-white hover:text-indigo-200 transition-colors">About</a>
+            </div>
+            <a href="/detect" class="btn-primary text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-all">
+                <i class="fas fa-video mr-2"></i>Detect Now
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content text-center">
+            <h1 class="text-5xl md:text-7xl font-bold text-white mb-6 fade-in">Welcome to Violence System Recognition</h1>
+            <p class="text-xl md:text-2xl text-gray-200 mb-10 max-w-3xl mx-auto fade-in delay-100">
+                Advanced AI-powered video analysis to detect and prevent violent content
+            </p>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6 fade-in delay-200">
+                <a href="/detect" class="btn-primary text-white px-8 py-4 rounded-full font-medium text-lg hover:shadow-lg transition-all">
+                    <i class="fas fa-play-circle mr-2"></i>Start Detection
+                </a>
+                <a href="#how-it-works" class="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full font-medium text-lg hover:bg-white hover:text-indigo-700 transition-all">
+                    <i class="fas fa-info-circle mr-2"></i>Learn More
+                </a>
+            </div>
+        </div>
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white">
+            <a href="#features" class="animate-bounce block">
+                <i class="fas fa-chevron-down text-2xl"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="stats-item bg-white p-8 text-center shadow-lg fade-in">
+                    <div class="text-indigo-600 text-4xl font-bold mb-2">95%</div>
+                    <div class="text-gray-600 text-lg">Accuracy</div>
+                </div>
+                <div class="stats-item bg-white p-8 text-center shadow-lg fade-in delay-100">
+                    <div class="text-indigo-600 text-4xl font-bold mb-2">2.5s</div>
+                    <div class="text-gray-600 text-lg">Average Processing Time</div>
+                </div>
+                <div class="stats-item bg-white p-8 text-center shadow-lg fade-in delay-200">
+                    <div class="text-indigo-600 text-4xl font-bold mb-2">10K+</div>
+                    <div class="text-gray-600 text-lg">Videos Analyzed Daily</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4 fade-in">Powerful Features</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto fade-in delay-100">Our advanced system offers cutting-edge capabilities for violence detection in video content</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-white p-6 pt-12 text-center fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Real-time Analysis</h3>
+                    <p class="text-gray-600">Process videos in real-time with our high-performance AI model for immediate results.</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="feature-card bg-white p-6 pt-12 text-center fade-in delay-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Advanced AI Model</h3>
+                    <p class="text-gray-600">Powered by state-of-the-art deep learning algorithms trained on diverse datasets.</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="feature-card bg-white p-6 pt-12 text-center fade-in delay-200">
+                    <div class="feature-icon">
+                        <i class="fas fa-eye text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Frame-by-Frame Detection</h3>
+                    <p class="text-gray-600">Analyze individual frames to identify violent content with high precision.</p>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="feature-card bg-white p-6 pt-12 text-center fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Content Moderation</h3>
+                    <p class="text-gray-600">Automatically flag and filter violent content to maintain safe environments.</p>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="feature-card bg-white p-6 pt-12 text-center fade-in delay-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Detailed Analytics</h3>
+                    <p class="text-gray-600">Get comprehensive insights with visual representations of detection results.</p>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="feature-card bg-white p-6 pt-12 text-center fade-in delay-200">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-video text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Multiple Format Support</h3>
+                    <p class="text-gray-600">Process videos in various formats including MP4, AVI, MOV, and MKV.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4 fade-in">How It Works</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto fade-in delay-100">Our system uses a sophisticated process to analyze and detect violent content</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Step 1 -->
+                <div class="text-center fade-in">
+                    <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-6 pulse">
+                        <i class="fas fa-upload text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Upload Video</h3>
+                    <p class="text-gray-600">Upload your video file through our simple drag-and-drop interface.</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="text-center fade-in delay-100">
+                    <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-6 pulse">
+                        <i class="fas fa-film text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Frame Extraction</h3>
+                    <p class="text-gray-600">Our system extracts key frames from the video for analysis.</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="text-center fade-in delay-200">
+                    <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-6 pulse">
+                        <i class="fas fa-brain text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">AI Analysis</h3>
+                    <p class="text-gray-600">Deep learning models analyze the frames to detect violent content.</p>
+                </div>
+                
+                <!-- Step 4 -->
+                <div class="text-center fade-in delay-300">
+                    <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center mx-auto mb-6 pulse">
+                        <i class="fas fa-check-circle text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Results</h3>
+                    <p class="text-gray-600">Receive instant results with visual indicators of detected content.</p>
+                </div>
+            </div>
+            
+            <div class="mt-16 text-center fade-in delay-400">
+                <a href="/detect" class="btn-primary text-white px-8 py-4 rounded-full font-medium text-lg inline-block">
+                    <i class="fas fa-play-circle mr-2"></i>Try It Now
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section id="technology" class="py-20 tech-section">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4 fade-in">Our Technology</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto fade-in delay-100">Powered by cutting-edge AI and deep learning technologies</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="tech-card bg-white p-8 rounded-lg shadow-lg fade-in">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center mr-4">
+                            <i class="fas fa-network-wired text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800">EfficientNet Architecture</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Our system utilizes the EfficientNet-B7 architecture, known for its exceptional performance in image classification tasks. This advanced neural network provides high accuracy while maintaining computational efficiency.
+                    </p>
+                    <p class="text-gray-600">
+                        The model has been fine-tuned specifically for violence detection, allowing it to identify subtle patterns and visual cues that indicate violent content.
+                    </p>
+                </div>
+                
+                <div class="tech-card bg-white p-8 rounded-lg shadow-lg fade-in delay-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center mr-4">
+                            <i class="fas fa-memory text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800">LSTM Neural Networks</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Long Short-Term Memory (LSTM) networks are employed to analyze temporal patterns across video frames. This allows our system to understand the context and sequence of actions in videos.
+                    </p>
+                    <p class="text-gray-600">
+                        The bidirectional LSTM architecture captures both forward and backward dependencies, enhancing the model's ability to detect complex violent scenarios.
+                    </p>
+                </div>
+                
+                <div class="tech-card bg-white p-8 rounded-lg shadow-lg fade-in">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center mr-4">
+                            <i class="fas fa-database text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800">Training Dataset</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Our models have been trained on a diverse dataset containing thousands of video samples, carefully annotated to distinguish between violent and non-violent content.
+                    </p>
+                    <p class="text-gray-600">
+                        The training process involves extensive data augmentation techniques to ensure the model generalizes well to various scenarios, lighting conditions, and video qualities.
+                    </p>
+                </div>
+                
+                <div class="tech-card bg-white p-8 rounded-lg shadow-lg fade-in delay-100">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center mr-4">
+                            <i class="fas fa-cogs text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800">Processing Pipeline</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Our system employs a sophisticated processing pipeline that handles video input, frame extraction, preprocessing, and feature extraction before feeding data to the neural networks.
+                    </p>
+                    <p class="text-gray-600">
+                        This optimized pipeline ensures fast processing times while maintaining high accuracy, making it suitable for both real-time and batch processing applications.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-12 md:mb-0 fade-in">
+                    <img src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="AI Technology" class="rounded-lg shadow-xl floating">
+                </div>
+                <div class="md:w-1/2 md:pl-12">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-6 fade-in">About Our System</h2>
+                    <p class="text-lg text-gray-600 mb-6 fade-in delay-100">
+                        The Violence Detection System was developed to address the growing need for automated content moderation in digital media. Our mission is to create safer online environments by providing powerful tools to identify and filter violent content.
+                    </p>
+                    <p class="text-lg text-gray-600 mb-8 fade-in delay-200">
+                        The system combines state-of-the-art deep learning models with an intuitive user interface, making advanced AI technology accessible to everyone. Whether you're a content moderator, platform owner, or researcher, our system provides the tools you need to analyze video content effectively.
+                    </p>
+                    <div class="fade-in delay-300">
+                        <a href="/detect" class="btn-primary text-white px-8 py-4 rounded-full font-medium text-lg inline-block">
+                            <i class="fas fa-play-circle mr-2"></i>Start Using Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 gradient-bg">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold text-white mb-6 fade-in">Ready to Try Our Violence Detection System?</h2>
+            <p class="text-xl text-indigo-100 mb-10 max-w-3xl mx-auto fade-in delay-100">
+                Experience the power of advanced AI technology in detecting violent content in videos
+            </p>
+            <a href="/detect" class="bg-white text-indigo-700 px-10 py-4 rounded-full font-medium text-lg inline-block hover:shadow-lg transition-all fade-in delay-200">
+                <i class="fas fa-video mr-2"></i>Start Detection Now
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-gradient text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-white text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-bold">VioDetect</span>
+                    </div>
+                    <p class="text-indigo-200">Advanced Violence Detection System</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#features" class="text-indigo-200 hover:text-white transition-colors">Features</a></li>
+                            <li><a href="#how-it-works" class="text-indigo-200 hover:text-white transition-colors">How It Works</a></li>
+                            <li><a href="#technology" class="text-indigo-200 hover:text-white transition-colors">Technology</a></li>
+                            <li><a href="#about" class="text-indigo-200 hover:text-white transition-colors">About</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-indigo-200 hover:text-white transition-colors">Documentation</a></li>
+                            <li><a href="#" class="text-indigo-200 hover:text-white transition-colors">API</a></li>
+                            <li><a href="#" class="text-indigo-200 hover:text-white transition-colors">Support</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                        <ul class="space-y-2">
+                            <li class="flex items-center"><i class="fas fa-envelope mr-2 text-indigo-400"></i> <a href="mailto:info@viodetect.com" class="text-indigo-200 hover:text-white transition-colors">info@viodetect.com</a></li>
+                            <li class="flex items-center"><i class="fas fa-phone mr-2 text-indigo-400"></i> <span class="text-indigo-200">+91 </span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-indigo-800 mt-12 pt-8 text-center text-indigo-300">
+                <p>&copy; 2025 Violence Detection System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            const navbarLinks = navbar.querySelectorAll('a:not(.btn-primary)');
+            const logo = navbar.querySelector('span');
+            
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+                navbar.classList.remove('py-4');
+                navbar.classList.add('py-2');
+                logo.classList.remove('text-white');
+                logo.classList.add('text-indigo-600');
+                
+                navbarLinks.forEach(link => {
+                    link.classList.remove('text-white');
+                    link.classList.add('text-gray-800');
+                });
+            } else {
+                navbar.classList.remove('scrolled');
+                navbar.classList.remove('py-2');
+                navbar.classList.add('py-4');
+                logo.classList.remove('text-indigo-600');
+                logo.classList.add('text-white');
+                
+                navbarLinks.forEach(link => {
+                    link.classList.remove('text-gray-800');
+                    link.classList.add('text-white');
+                });
+            }
+        });
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Fade-in animation on scroll
+        function checkFadeElements() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            fadeElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementBottom = element.getBoundingClientRect().bottom;
+                
+                if (elementTop < window.innerHeight - 100 && elementBottom > 0) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        // Initial check for elements in view
+        window.addEventListener('load', checkFadeElements);
+        
+        // Check for new elements on scroll
+        window.addEventListener('scroll', checkFadeElements);
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Violence Detection System - Detection Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f7f9fc;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+        }
+        
+        .drag-area {
+            border: 2px dashed #6366F1;
+            height: 300px;
+            width: 100%;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .drag-area.active {
+            border: 2px solid #6366F1;
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        
+        .drag-area:hover {
+            border-color: #4F46E5;
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        
+        .frames-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+        
+        .frame-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .frame-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .frame-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+        }
+        
+        .footer-gradient {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+        }
+        
+        /* Loading animation */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(99, 102, 241, 0.2);
+            border-radius: 50%;
+            border-top-color: #6366F1;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Pulse animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        /* Fade in animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .fade-in.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #6366F1;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4F46E5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="/" class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
+                    <i class="fas fa-shield-alt text-white text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold text-indigo-600">VioDetect</span>
+            </a>
+            <div class="hidden md:flex space-x-8">
+                <a href="/" class="text-gray-600 hover:text-indigo-600 transition-colors">Home</a>
+                <a href="/#features" class="text-gray-600 hover:text-indigo-600 transition-colors">Features</a>
+                <a href="/#how-it-works" class="text-gray-600 hover:text-indigo-600 transition-colors">How It Works</a>
+                <a href="/#technology" class="text-gray-600 hover:text-indigo-600 transition-colors">Technology</a>
+            </div>
+            <a href="/detect" class="btn-primary text-white px-6 py-2 rounded-full font-medium hover:shadow-lg transition-all">
+                <i class="fas fa-video mr-2"></i>Detect
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-12">
+        <header class="text-center mb-12 fade-in">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Video Violence Detection Tool</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Upload a video to analyze and detect violent content using our advanced AI technology</p>
+        </header>
+
+        <main class="bg-white rounded-xl shadow-lg p-8 max-w-4xl mx-auto mb-12 fade-in">
+            {% if not model_status %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg mb-8" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-xl mr-3"></i>
+                    <div>
+                        <strong class="font-bold">Error:</strong>
+                        <span class="block sm:inline ml-1">Model could not be loaded. Please check server logs.</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mb-10 fade-in">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Upload Video</h2>
+                <form id="upload-form" enctype="multipart/form-data">
+                    <div id="drag-area" class="drag-area">
+                        <div class="icon mb-4">
+                            <i class="fas fa-cloud-upload-alt text-indigo-500 text-5xl"></i>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-medium text-gray-700 mb-2">Drag & Drop your video here</h3>
+                            <p class="text-gray-500 mb-4">or</p>
+                            <button type="button" id="browse-btn" class="btn-primary text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all">
+                                <i class="fas fa-folder-open mr-2"></i>Browse Files
+                            </button>
+                            <input type="file" id="file-input" name="video" accept=".mp4,.avi,.mov,.mkv" class="hidden">
+                            <p class="text-sm text-gray-500 mt-4">Supported formats: MP4, AVI, MOV, MKV</p>
+                        </div>
+                    </div>
+                    <div id="file-details" class="mt-6 hidden">
+                        <div class="flex items-center justify-between p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-lg bg-indigo-100 flex items-center justify-center mr-4">
+                                    <i class="fas fa-file-video text-indigo-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-800" id="file-name"></h4>
+                                    <p class="text-sm text-gray-500" id="file-size"></p>
+                                </div>
+                            </div>
+                            <button type="button" id="remove-btn" class="text-red-500 hover:text-red-700 transition-colors">
+                                <i class="fas fa-times-circle text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <button type="submit" id="predict-btn" class="w-full btn-primary text-white px-6 py-4 rounded-lg font-medium text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-search mr-2"></i>Analyze Video
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="loading" class="hidden py-12 fade-in">
+                <div class="flex flex-col items-center justify-center">
+                    <div class="loading-spinner mb-6"></div>
+                    <h3 class="text-xl font-medium text-gray-800 mb-2">Processing Video</h3>
+                    <p class="text-gray-600">Please wait while our AI analyzes your video...</p>
+                </div>
+            </div>
+
+            <div id="results" class="hidden fade-in">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Analysis Results</h2>
+                
+                <div id="prediction-result" class="mb-8 p-6 rounded-lg"></div>
+                
+                <h3 class="text-xl font-medium text-gray-800 mb-4">Analyzed Frames</h3>
+                <p class="text-gray-600 mb-6">These are the key frames that were analyzed by our AI model:</p>
+                <div id="frames-container" class="frames-container"></div>
+                
+                <div class="mt-10 text-center">
+                    <button id="analyze-another" class="btn-primary text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transition-all">
+                        <i class="fas fa-redo mr-2"></i>Analyze Another Video
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-gradient text-white py-8">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
+                            <i class="fas fa-shield-alt text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold">VioDetect</span>
+                    </div>
+                    <p class="text-indigo-200 text-sm">Advanced Violence Detection System</p>
+                </div>
+                <div>
+                    <a href="/" class="text-indigo-200 hover:text-white transition-colors mr-6">Home</a>
+                    <a href="/#features" class="text-indigo-200 hover:text-white transition-colors mr-6">Features</a>
+                    <a href="/#technology" class="text-indigo-200 hover:text-white transition-colors">Technology</a>
+                </div>
+            </div>
+            <div class="border-t border-indigo-800 mt-6 pt-6 text-center text-indigo-300 text-sm">
+                <p>&copy; 2023 Violence Detection System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const dragArea = document.getElementById('drag-area');
+            const browseBtn = document.getElementById('browse-btn');
+            const fileInput = document.getElementById('file-input');
+            const fileDetails = document.getElementById('file-details');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const removeBtn = document.getElementById('remove-btn');
+            const predictBtn = document.getElementById('predict-btn');
+            const uploadForm = document.getElementById('upload-form');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const predictionResult = document.getElementById('prediction-result');
+            const framesContainer = document.getElementById('frames-container');
+            const analyzeAnother = document.getElementById('analyze-another');
+            
+            // Activate fade-in elements
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach(element => {
+                element.classList.add('active');
+            });
+
+            // Browse button click
+            browseBtn.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', function() {
+                handleFile(this.files[0]);
+            });
+
+            // Drag and drop events
+            ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dragArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            dragArea.addEventListener('dragover', function() {
+                this.classList.add('active');
+            });
+
+            dragArea.addEventListener('dragleave', function() {
+                this.classList.remove('active');
+            });
+
+            dragArea.addEventListener('drop', function(e) {
+                this.classList.remove('active');
+                const file = e.dataTransfer.files[0];
+                handleFile(file);
+            });
+
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Handle the selected file
+            function handleFile(file) {
+                if (file) {
+                    const validTypes = ['video/mp4', 'video/avi', 'video/quicktime', 'video/x-matroska'];
+                    if (!validTypes.includes(file.type)) {
+                        showAlert('Please upload a valid video file (MP4, AVI, MOV, or MKV)');
+                        return;
+                    }
+
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    fileDetails.classList.remove('hidden');
+                    predictBtn.disabled = false;
+                    
+                    // Clear and set the file
+                    fileInput.files = new DataTransfer().files;
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                }
+            }
+
+            // Show alert
+            function showAlert(message) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center';
+                alertDiv.innerHTML = `
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span>${message}</span>
+                    <button class="ml-4 text-red-700 hover:text-red-900">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                document.body.appendChild(alertDiv);
+                
+                const closeBtn = alertDiv.querySelector('button');
+                closeBtn.addEventListener('click', () => {
+                    alertDiv.remove();
+                });
+                
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+
+            // Remove file
+            removeBtn.addEventListener('click', () => {
+                fileInput.value = '';
+                fileDetails.classList.add('hidden');
+                predictBtn.disabled = true;
+            });
+
+            // Analyze another video
+            analyzeAnother.addEventListener('click', () => {
+                results.classList.add('hidden');
+                fileInput.value = '';
+                fileDetails.classList.add('hidden');
+                predictBtn.disabled = true;
+                uploadForm.parentElement.classList.remove('hidden');
+            });
+
+            // Form submission
+            uploadForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!fileInput.files[0]) {
+                    showAlert('Please select a video file');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('video', fileInput.files[0]);
+
+                // Show loading
+                uploadForm.parentElement.classList.add('hidden');
+                loading.classList.remove('hidden');
+                results.classList.add('hidden');
+
+                fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Something went wrong');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide loading
+                    loading.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    
+                    // Display prediction
+                    const isViolent = data.prediction === 'Violence';
+                    const predictionClass = isViolent ? 
+                        'bg-red-50 border border-red-200 text-red-800' : 
+                        'bg-green-50 border border-green-200 text-green-800';
+                    
+                    predictionResult.className = `mb-8 p-6 rounded-lg ${predictionClass}`;
+                    predictionResult.innerHTML = `
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 rounded-full ${isViolent ? 'bg-red-100' : 'bg-green-100'} flex items-center justify-center mr-4">
+                                <i class="fas ${isViolent ? 'fa-exclamation-triangle' : 'fa-check'} ${isViolent ? 'text-red-600' : 'text-green-600'} text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold">${data.prediction}</h3>
+                                <p class="text-lg">${isViolent ? 'Violent content detected' : 'No violent content detected'}</p>
+                            </div>
+                        </div>
+                        <p class="text-lg">
+                            ${isViolent ? 
+                                'Our AI system has identified patterns consistent with violent content in this video. The analyzed frames show potential violent scenes or actions.' : 
+                                'Our AI system did not detect any significant patterns of violence in this video. The content appears to be non-violent based on our analysis.'}
+                        </p>
+                    `;
+                    
+                    // Display frames
+                    framesContainer.innerHTML = '';
+                    data.frames.forEach((frame, index) => {
+                        const frameElement = document.createElement('div');
+                        frameElement.className = 'frame-item';
+                        frameElement.innerHTML = `
+                            <img src="data:image/jpeg;base64,${frame}" alt="Frame ${index + 1}">
+                            <div class="p-2 bg-white">
+                                <p class="text-sm text-gray-600 text-center">Frame ${index + 1}</p>
+                            </div>
+                        `;
+                        framesContainer.appendChild(frameElement);
+                    });
+                })
+                .catch(error => {
+                    loading.classList.add('hidden');
+                    uploadForm.parentElement.classList.remove('hidden');
+                    showAlert(error.message);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
